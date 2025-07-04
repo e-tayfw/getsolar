@@ -1,0 +1,102 @@
+getSolar Product Specifications & Pricing
+========================================
+
+1. Overview
+-----------
+getSolar is a leading provider of high-efficiency solar energy solutions designed for residential, commercial, and off-grid applications. Our product suite combines cutting-edge photovoltaic technology with robust engineering to deliver reliable, sustainable power generation. This document outlines our current product lineup, technical specifications, pricing tiers, warranty information, and ordering details.
+
+2. Product Lineup
+-----------------
+2.1 getSolar MicroPanel
+   • Description: Compact, lightweight solar panel optimized for small-scale residential and RV installations.
+   • Ideal for: Homeowners, campers, tiny homes.
+   • Key Features:
+     - High efficiency monocrystalline cells
+     - Integrated mounting rail system
+     - Quick-connect MC4 connectors
+
+2.2 getSolar MaxiPanel
+   • Description: Large-area panel designed for rooftop residential and commercial arrays.
+   • Ideal for: Residential rooftops, small businesses.
+   • Key Features:
+     - Bifacial cell technology
+     - Reinforced tempered glass
+     - Anti-reflective coating
+
+2.3 getSolar PowerStation
+   • Description: All-in-one battery storage system with integrated inverter.
+   • Ideal for: Backup power, off-grid cabins, emergency response.
+   • Key Features:
+     - 10 kWh lithium-ion battery pack
+     - 5 kW pure-sine-wave inverter
+     - Modular expandable design
+     - Smart energy management software
+
+3. Technical Specifications
+---------------------------
+3.1 getSolar MicroPanel
+   • Nominal Power: 100 W
+   • Voltage at Pmax (Vmp): 18.1 V
+   • Current at Pmax (Imp): 5.52 A
+   • Open-Circuit Voltage (Voc): 21.6 V
+   • Short-Circuit Current (Isc): 5.85 A
+   • Dimensions: 950 x 350 x 25 mm
+   • Weight: 8.5 kg
+   • Efficiency: 21.1%
+   • Operating Temperature: -40°C to +85°C
+   • IP Rating: IP68
+
+3.2 getSolar MaxiPanel
+   • Nominal Power: 350 W
+   • Voltage at Pmax (Vmp): 36.9 V
+   • Current at Pmax (Imp): 9.49 A
+   • Open-Circuit Voltage (Voc): 45.3 V
+   • Short-Circuit Current (Isc): 10.05 A
+   • Dimensions: 1700 x 1010 x 35 mm
+   • Weight: 22.0 kg
+   • Efficiency: 20.7%
+   • Operating Temperature: -40°C to +85°C
+   • IP Rating: IP68
+
+3.3 getSolar PowerStation
+   • Battery Capacity: 10,000 Wh (10 kWh)
+   • Inverter Output: 5,000 W continuous / 10,000 W surge
+   • Input Voltage Range: 48 V
+   • Communication: Wi-Fi, LAN, RS485
+   • Dimensions: 600 x 450 x 200 mm
+   • Weight: 75 kg
+   • Operating Temperature: -20°C to +60°C
+   • Warranty: 10 years on battery cells, 5 years on inverter
+
+4. Pricing & Packages
+---------------------
+4.1 Basic Package
+   • Includes: 4 × MicroPanel, mounting hardware, basic monitoring.
+   • Price: USD 1,199
+
+4.2 Professional Package
+   • Includes: 4 × MaxiPanel, 1 × PowerStation, premium monitoring.
+   • Price: USD 4,899
+
+4.3 Enterprise Package
+   • Includes: 12 × MaxiPanel, 2 × PowerStation, on-site installation, 24/7 support.
+   • Price: USD 14,999
+
+5. Warranty & Support
+---------------------
+• Standard Warranty:
+  - Solar Panels: 25-year performance warranty (80% output).
+  - PowerStation: 10-year warranty on battery cells; 5-year warranty on inverter.
+• Support:
+  - Online ticketing system (response within 24 hours).
+  - Phone support (Mon–Fri, 8am–6pm local time).
+  - On-site maintenance available under Enterprise Package.
+
+6. Ordering & Contact
+---------------------
+To place an order or request a custom quote, contact our sales team:
+• Email: sales@getsolar.com
+• Phone: +1 (800) 555-GETS
+• Website: https://www.getsolar.com/orders
+
+Thank you for choosing getSolar as your partner in clean energy innovation.
