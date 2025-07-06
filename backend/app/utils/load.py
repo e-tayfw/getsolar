@@ -23,7 +23,7 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT_DIR / "app" / "data"
 
 OPENAPI_KEY = os.getenv("OPENAI_API_KEY")
-WEAVIATE_PORT = os.getenv("WEAVIATE_PORT")
+WEAVIATE_PORT = int(os.getenv("WEAVIATE_PORT"))
 WEAVIATE_HOST = os.getenv("WEAVIATE_HOST")
 headers = {"X-OpenAI-Api-Key": OPENAPI_KEY}
 

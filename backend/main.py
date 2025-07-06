@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 from fastapi import FastAPI
 import uvicorn
 
@@ -36,8 +37,9 @@ app.include_router(
 )
 
 if __name__ == "__main__":
-    mlflow.set_tracking_uri("http://localhost:5001")
-    mlflow.set_experiment("DSPy Get Solar AI Customer Support")
+    tracking_uri = "http://mlflow:5000"
+    mlflow.set_tracking_uri(tracking_uri)
+    mlflow.set_experiment("DSPy Get Solar AI Support")
     mlflow.dspy.autolog()
     uvicorn.run(app="main:app", host="0.0.0.0", reload=True, reload_dirs=["app"])
 

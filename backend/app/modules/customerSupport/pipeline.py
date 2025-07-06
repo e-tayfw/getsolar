@@ -4,9 +4,9 @@ import dspy
 import mlflow
 import mlflow.dspy
 
-
-mlflow.set_tracking_uri("http://localhost:5001")
-mlflow.set_experiment("DSPy Get Solar AI Customer Support")
+tracking_uri = "http://mlflow:5000"
+mlflow.set_tracking_uri(tracking_uri)
+mlflow.set_experiment("DSPy Get Solar AI Support")
 mlflow.dspy.autolog()
 
 react_agent = dspy.ReAct(signature=ReactSignature, tools=[faqRetrieval, vectorRetrieval, webSearch])

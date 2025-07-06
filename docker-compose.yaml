@@ -1,5 +1,7 @@
+version: "3.8"
 
 services:
+  # ————————————— Weaviate Vector DB —————————————
   weaviate:
     image: cr.weaviate.io/semitechnologies/weaviate:1.31.3
     container_name: weaviate-getSolar
@@ -11,7 +13,7 @@ services:
       - --scheme
       - "http"
     volumes:
-    - weaviate_data:/var/lib/weaviate
+      - weaviate_data:/var/lib/weaviate
     restart: on-failure
     ports:
       - "8080:8080"
@@ -23,12 +25,114 @@ services:
       DEFAULT_VECTORIZER_MODULE: text2vec-openai
       CLUSTER_HOSTNAME: 'node1'
       OPENAI_APIKEY: "${OPENAI_API_KEY}"
+
+  # ————————————— MLflow Backend DB —————————————
+  postgres-mlflow:
+    image: postgres:17
+    container_name: mlflow-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1029
+      POSTGRES_DB: mlflowdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - mlflow_pgdata:/var/lib/postgresql/data
+
+  # ————————————— MLflow Artifact Store —————————————
+  minio:
+    image: minio/minio:latest
+    container_name: mlflow-minio
+    environment:
+      MINIO_ROOT_USER: minio_user
+      MINIO_ROOT_PASSWORD: minio_password
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - mlflow_minio_data:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/meta"]
-      interval: 30s
+      test: timeout 5s bash -c ':> /dev/tcp/127.0.0.1/9000' || exit 1
+      interval: 1s
       timeout: 10s
       retries: 5
 
+  # ————————————— MLflow Tracking Server —————————————
+  mlflow:
+    image: my-mlflow-server
+    container_name: mlflow-server
+    depends_on:
+      - postgres-mlflow
+      - minio
+    ports:
+      - "5001:5000"
+    environment:
+      # tell MLflow where to talk to Postgres
+      AWS_ACCESS_KEY_ID: minio_user
+      AWS_SECRET_ACCESS_KEY: minio_password
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      # optional to suppress InsecureTransport warnings
+      AWS_REGION: us-east-1
+    command: mlflow server --backend-store-uri 'postgresql+psycopg2://postgres:1029@postgres-mlflow:5432/mlflowdb' --artifacts-destination 's3://getsolar-ai/' --serve-artifacts --host 0.0.0.0 --port 5000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(); s.connect(('localhost', 5000))"]
+      interval: 30s
+      timeout: 20s
+      retries: 5
+  # ————————————— MinIO Bucket Creation —————————————
+  minio-create-bucket:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      bash -c "
+      mc alias set minio http://minio:9000 minio_user minio_password &&
+      if ! mc ls minio/getsolar-ai; then
+        mc mb minio/getsolar-ai
+      else
+        echo 'bucket already exists'
+      fi
+      "
+
+  # ————————————— Your FastAPI Backend —————————————
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: backend-getSolar
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      WEAVIATE_HOST: "weaviate"  # use the service name defined in docker-compose
+      WEAVIATE_PORT: "8080"
+      VECTOR_DB_URL: "weaviate://weaviate:8080"
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      POSTGRES_URL: "${POSTGRES_URL}"   # your CRM DB (if any)
+      MLFLOW_TRACKING_URI: "http://mlflow:5000"
+      AWS_ACCESS_KEY_ID: minio_user       # used by mlflow.dspy.autolog if writing artifacts
+      AWS_SECRET_ACCESS_KEY: minio_password
+      MLFLOW_S3_ENDPOINT_URL: http://minio:9000
+      TAVILY_API_KEY: ${TAVILY_API_KEY}  # API key for Tavily web search
+
+  # ————————————— Your Streamlit Frontend —————————————
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: frontend-getSolar
+    depends_on:
+      - backend
+    ports:
+      - "8501:8501"
+    environment:
+      BACKEND_URL: "http://backend:8000"
+
 volumes:
   weaviate_data:
-    
+  mlflow_pgdata:
+  mlflow_minio_data:

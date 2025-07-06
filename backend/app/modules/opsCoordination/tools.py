@@ -5,6 +5,7 @@ from .models import Lead, LeadEvent
 import json
 
 
+
 def crm_fetch(lead_id: str) -> str:
     """
     Fetch a lead by ID and return its fields wrapped in a Python docstring.

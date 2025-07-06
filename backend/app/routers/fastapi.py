@@ -11,14 +11,6 @@ from app.utils.functions import chat
 
 rag_router = APIRouter()
 
-@rag_router.get("/health")
-async def health_check():
-    try:
-        return {"status": "ok"}
-    except Exception as e:
-        print(f"Health check failed: {e}")
-        raise HTTPException(status_code=500, detail="Health check failed.")
-
 @rag_router.post("/uploadfile")
 async def upload_file(file: UploadFile):
     # Define allowed extensions
