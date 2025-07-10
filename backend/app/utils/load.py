@@ -27,6 +27,9 @@ WEAVIATE_PORT = int(os.getenv("WEAVIATE_PORT"))
 WEAVIATE_HOST = os.getenv("WEAVIATE_HOST")
 headers = {"X-OpenAI-Api-Key": OPENAPI_KEY}
 
+FAQ_FILENAME = "gtSolar_product_specs.txt"
+CRITERIA_FILENAME = "getSolar_lead_evaluation_criteria.txt"
+
 client = weaviate.connect_to_local(
     host=WEAVIATE_HOST, port=WEAVIATE_PORT, headers=headers
 )
@@ -66,6 +69,9 @@ def store_documents():
     """
 
     chunks_list = []
+    faq_chunks = []
+    criteria_chunks = []
+
     processed_files = 0
     skipped_files = 0
     failed_files = []
@@ -108,7 +114,11 @@ def store_documents():
                     "content": chunk,
                     "chunk_index": i,
                 }
-                chunks_list.append(wvc.data.DataObject(properties=data_properties))
+                obj = wvc.data.DataObject(properties=data_properties)
+                if filename == FAQ_FILENAME:
+                    faq_chunks.append(obj)
+                else:
+                    criteria_chunks.append(obj)
 
             processed_files += 1
         
@@ -116,19 +126,24 @@ def store_documents():
             logger.error(f"Failed to process file {filename}: {e}")
             failed_files.append({"filename": filename, "error": str(e)})
 
-    collection_name = "getSolar"
+    faq_collection_name = "getSolarFAQ"
+    criteria_collection_name = "getSolarLeadCriteria"
 
-    if client.collections.exists(collection_name):
-        client.collections.delete(collection_name)
+
+    if client.collections.exists(faq_collection_name):
+        client.collections.delete(faq_collection_name)
     
-    logger.info("Creating Schema 'getSolar data'...")
+    if client.collections.exists(criteria_collection_name):
+        client.collections.delete(criteria_collection_name)
+    
+    logger.info("Creating Schema 'getSolar faq data'...")
     properties = [
         wvc.config.Property(name="content", data_type=wvc.config.DataType.TEXT),
         wvc.config.Property(name="filename", data_type=wvc.config.DataType.TEXT),
         wvc.config.Property(name="chunk_index", data_type=wvc.config.DataType.INT),
     ]
     client.collections.create(
-        name=collection_name,
+        name=faq_collection_name,
         properties=properties,
         vectorizer_config=[
             Configure.NamedVectors.text2vec_openai(
@@ -141,20 +156,53 @@ def store_documents():
         ],
 )
     
-    if chunks_list:
+    if faq_chunks:
         logger.info(
-            f"Inserting {len(chunks_list)} chunks into the 'getSolar' collection..."
+            f"Inserting {len(faq_chunks)} chunks into the 'getSolar' collection..."
         )
-        client.collections.get(collection_name).data.insert_many(chunks_list)
+        client.collections.get(faq_collection_name).data.insert_many(faq_chunks)
         logger.info(
-            f"Successfully added {len(chunks_list)} objects to the 'getSolar' collection."
+            f"Successfully added {len(faq_chunks)} objects to the 'faq getSolar' collection."
         )
+    
+    
+    logger.info("Creating Schema 'lead_evaluation_criteria'...")
+    properties = [
+        wvc.config.Property(name="content", data_type=wvc.config.DataType.TEXT),
+        wvc.config.Property(name="filename", data_type=wvc.config.DataType.TEXT),
+        wvc.config.Property(name="chunk_index", data_type=wvc.config.DataType.INT),
+    ]
+    client.collections.create(
+        name=criteria_collection_name,
+        properties=properties,
+        vectorizer_config=[
+            Configure.NamedVectors.text2vec_openai(
+                name="openai_text_vectoriser",
+                source_properties=[prop.name for prop in properties],
+                model="text-embedding-3-large",
+                type_="text",
+                dimensions=1024,
+            )
+        ],
+)
+    
+    if criteria_chunks:
+        logger.info(
+            f"Inserting {len(criteria_chunks)} chunks into the 'lead_evaluation_criteria' collection..."
+        )
+        client.collections.get(criteria_collection_name).data.insert_many(criteria_chunks)
+        logger.info(
+            f"Successfully added {len(criteria_chunks)} objects to the 'lead_evaluation_criteria' collection."
+        )
+
+
 
     return {
         "processed_files": processed_files,
         "skipped_files": skipped_files,
         "failed_files": failed_files,
-        "inserted_chunks": len(chunks_list),
+        "inserted_faq_chunks": len(faq_chunks),
+        "inserted_criteria_chunks": len(criteria_chunks),
     }
 
 if __name__ == "__main__":

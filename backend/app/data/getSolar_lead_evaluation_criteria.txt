@@ -1,0 +1,35 @@
+GetSolar Lead Evaluation Criteria
+
+Introduction
+This document outlines the criteria used to evaluate potential leads for GetSolar's residential and commercial solar solutions in Singapore.
+
+1. Property & Location
+- Must be landed residential or commercial/industrial rooftop property in Singapore.
+- Minimum roof area: 50 sqm for residential, 200 sqm for commercial.
+- Roof orientation: South-facing or within 30° of south for optimal solar yield.
+- Structural integrity: Roof age < 20 years and no major repairs pending.
+
+2. Demographic & Legal
+- Lead is ≥ 18 years old and a legal Singapore resident or registered business entity.
+- Property ownership: Direct owner or long-term leaseholder with ≥ 10 years remaining.
+
+3. Financial Viability
+- Monthly electricity bill ≥ SGD 200 for residential, ≥ SGD 1 000 for commercial.
+- Credit score: Satisfactory credit history with no defaults in the past 2 years.
+- Willingness to commit to Rent-To-Own or PPA with minimum 5-year term.
+
+4. Technical Feasibility
+- No significant shading from adjacent buildings or trees during peak sun hours.
+- Roof tilt between 10° and 30° for optimal performance.
+- Access for installation and maintenance must be guaranteed.
+
+5. Strategic Alignment
+- Interest in sustainability and ESG objectives for businesses.
+- Alignment with GetSolar’s RTO or PPA models.
+
+6. Regulatory Compliance
+- Compliance with JTC, URA, or HDB solar installation guidelines.
+- Ability to obtain necessary permits and approvals.
+
+Approval:
+This criteria document is approved by GetSolar’s Business Development Team.

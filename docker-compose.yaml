@@ -102,6 +102,8 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     container_name: backend-getSolar
+    volumes:
+      - ./backend:/app
     depends_on:
       mlflow:
         condition: service_healthy
@@ -125,6 +127,8 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
     container_name: frontend-getSolar
+    volumes:
+      - ./frontend
     depends_on:
       - backend
     ports:

@@ -1,28 +1,48 @@
--- 1) Leads table
+-- 1) Drop old tables (in the right order)
+DROP TABLE IF EXISTS lead_events;
+DROP TABLE IF EXISTS leads;
+
+-- 2) Create new tables
+
+-- 2.1 Users
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    email VARCHAR(255) UNIQUE NOT NULL
+);
+
+-- 2.2 Leads (now pointing at users)
 CREATE TABLE leads (
-  lead_id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email             TEXT NOT NULL UNIQUE,
-  name              TEXT,
-  status            TEXT NOT NULL,  -- e.g. 'new', 'qualify_sent', 'booked', 'rejected'
-  interest_level    TEXT,           -- e.g. 'high', 'medium', 'low'
-  budget            NUMERIC(12,2),  -- budget in SGD
-  timeline_months   INT,            -- desired timeline
-  site_visit_time   TIMESTAMPTZ,    -- scheduled visit
-  questionnaire     JSONB,          -- {q1: ans1, q2: ans2...}
-  rejection_reason  TEXT,
-  created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    status VARCHAR(50),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 2) Lead events table (episodic log)
-CREATE TABLE lead_events (
-  event_id    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  lead_id     UUID NOT NULL REFERENCES leads(lead_id) ON DELETE CASCADE,
-  event_type  TEXT NOT NULL,       -- 'qualify_sent','booked','cancelled','rejected','reminder_sent'
-  payload     JSONB,               -- any extra data (timestamps, slot info, etc.)
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+-- 2.3 Actions (audit log of any user action)
+CREATE TABLE actions (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    action_type VARCHAR(50),
+    details JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Indexes for fast lookups
-CREATE INDEX ON leads (status);
-CREATE INDEX ON lead_events (lead_id, event_type);
+-- 2.4 Schedules (Google‐Calendar slots, etc.)
+CREATE TABLE schedules (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    slot TIMESTAMP WITH TIME ZONE NOT NULL,
+    status VARCHAR(50),
+    calendar_event_id VARCHAR(255)
+);
+
+-- 2.5 Qualifications (questions + responses)
+CREATE TABLE qualifications (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    questions JSONB,       -- e.g. [{question_id, text}, …]
+    responses JSONB,       -- e.g. [{question_id, answer}, …]
+    result BOOLEAN,
+    evaluated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

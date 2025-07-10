@@ -8,10 +8,9 @@ from dotenv import load_dotenv
 import dspy
 
 load_dotenv()
-from dspy.retrieve.weaviate_rm import WeaviateRM
 
 
-FAQ_COLLECTION_NAME = "getSolar"
+FAQ_COLLECTION_NAME = "getSolarFAQ"
 weaviate_port = int(os.getenv("WEAVIATE_PORT"))
 weaviate_host = os.getenv("WEAVIATE_HOST")
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
