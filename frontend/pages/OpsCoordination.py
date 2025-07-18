@@ -16,7 +16,7 @@ if "user_id" not in st.session_state:
 st.set_page_config(page_title="Ops Coordination", page_icon="🏗️")
 
 FASTAPI_BASE = os.getenv("FASTAPI_BACKEND_URL", "http://localhost:8000")
-OPS_URL = f"{FASTAPI_BASE}/solar/ops"
+OPS_URL = f"{FASTAPI_BASE}/solar/form"
 
 st.title("🚀 GetSolar Ops Coordination Test Form")
 st.markdown(
@@ -83,9 +83,9 @@ def get_form_response(server_url: str, body: dict):
 
 if submitted:
     body = {
-        "lead_id": user_id,
+        "user_id": user_id,
         "name": name,
-        "user_email": email,
+        "email": email,
         "phone": phone,
         "address": address,
         "company": company,
@@ -94,9 +94,7 @@ if submitted:
         "timeline_months": timeline_months,
         "interest_level": interest_level,
         "requested_capacity": requested_capacity,
-        "action": enquiry,
-        "timestamp": datetime.utcnow().isoformat() + "Z",
-        "source": "web_form",         # so your backend can route differently
+        "enquiry": enquiry,
     }
 
     st.write("### 🚚 Sending information")

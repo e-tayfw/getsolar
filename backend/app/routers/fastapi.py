@@ -3,11 +3,11 @@ import io
 import os
 import shutil
 from app.utils.load import store_documents
-from app.utils.models import QueryRequest
+from app.utils.models import QueryForm, QueryRequest
 from fastapi import APIRouter, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from fastapi import UploadFile
-from app.utils.functions import chat
+from app.utils.functions import chat, form
 
 rag_router = APIRouter()
 
@@ -43,6 +43,10 @@ async def store_documents_endpoint():
 @rag_router.post("/chat")
 async def chat_endpoint(request: QueryRequest):
     return await chat(request)
+
+@rag_router.post("/form")
+async def form_endpoint(request: QueryForm):
+    return await form(request)
 
 
 

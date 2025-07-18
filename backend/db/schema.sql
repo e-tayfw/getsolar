@@ -1,37 +1,41 @@
 -- 1) Drop old tables (in the right order)
 DROP TABLE IF EXISTS lead_events;
 DROP TABLE IF EXISTS leads;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS actions;
+DROP TABLE IF EXISTS schedules;
+DROP TABLE IF EXISTS qualifications;
+
 
 -- 2) Create new tables
 
--- 2.1 Users
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     name VARCHAR(255),
-    email VARCHAR(255) UNIQUE NOT NULL
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(50),
+    address TEXT,
+    company VARCHAR(255),
+    referral_source VARCHAR(100),
+    budget NUMERIC,
+    timeline_months INTEGER,
+    interest_level VARCHAR(50),
+    requested_capacity VARCHAR(50),
+    status VARCHAR(50) DEFAULT 'new'
 );
 
--- 2.2 Leads (now pointing at users)
 CREATE TABLE leads (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     status VARCHAR(50),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- 2.3 Actions (audit log of any user action)
-CREATE TABLE actions (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    action_type VARCHAR(50),
-    details JSONB,
+    qualification_status VARCHAR(50),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 2.4 Schedules (Google‐Calendar slots, etc.)
 CREATE TABLE schedules (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     slot TIMESTAMP WITH TIME ZONE NOT NULL,
     status VARCHAR(50),
     calendar_event_id VARCHAR(255)
@@ -40,7 +44,8 @@ CREATE TABLE schedules (
 -- 2.5 Qualifications (questions + responses)
 CREATE TABLE qualifications (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    -- qualifications belong to a lead/user and record status changes
     questions JSONB,       -- e.g. [{question_id, text}, …]
     responses JSONB,       -- e.g. [{question_id, answer}, …]
     result BOOLEAN,

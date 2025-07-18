@@ -6,7 +6,7 @@ class FormIngestion(dspy.Signature):
     Ingest raw user request data from form
     """
 
-    user_id: int = dspy.InputField(desc="Unique identifier for the user")
+    user_id: str = dspy.InputField(desc="Unique identifier for the user")
     name: str = dspy.InputField(desc="Name of the user making the request")
     email: str = dspy.InputField(desc="Email of the user making the request")
     phone: str = dspy.InputField(desc="Phone number of the user making the request")
@@ -40,7 +40,7 @@ class GenerateQualificationQuestions(dspy.Signature):
 
     lead_id: int = dspy.InputField(desc="Lead ID of the user")
     context: dict = dspy.InputField(desc="Contextual information and structured details about the user")
-    questions: list[str] = dspy.OutputField("List of qualification questions to ask the user")
+    questions: list[str] = dspy.OutputField(desc="List of qualification questions to ask the user")
 
 class QualificationEvaluator(dspy.Signature):
     """
@@ -49,9 +49,9 @@ class QualificationEvaluator(dspy.Signature):
     Update the database accordingly and provide feedback on the user's responses.
     """
     
-    responses: str = dspy.InputField("User's responses to the qualification questions")
-    result: bool = dspy.OutputField("True if the user qualifies, False otherwise")
-    feedback: str = dspy.OutputField("Feedback on the user's responses, including areas for improvement or next steps")
+    responses: str = dspy.InputField(desc="User's responses to the qualification questions")
+    result: bool = dspy.OutputField(desc="True if the user qualifies, False otherwise")
+    feedback: str = dspy.OutputField(desc="Feedback on the user's responses, including areas for improvement or next steps")
 
 
 

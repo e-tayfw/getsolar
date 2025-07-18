@@ -1,6 +1,9 @@
+import json
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from typing import Any, Optional, Dict
+from typing import Any, List, Optional, Dict
+from mailersend import MailerSend
+from mailersend.models import Template, Personalization
 import os
 import weaviate
 from dotenv import load_dotenv
@@ -9,6 +12,7 @@ load_dotenv()
 
 
 CRITERIA_COLLECTION_NAME = "getSolarLeadCriteria"
+mailer = MailerSend(api_key=os.getenv("MAILERSEND_API_KEY"))
 weaviate_port = int(os.getenv("WEAVIATE_PORT"))
 weaviate_host = os.getenv("WEAVIATE_HOST")
 
@@ -24,7 +28,7 @@ def get_db_connection():
         dbname="getSolar_crm",
         user="postgres",
         password="1029",
-        host="localhost",
+        host="host.docker.internal",
         port=5432
     )
 
@@ -57,6 +61,7 @@ def get_user_by_id(user_id: str) -> Optional[Dict[str, Any]]:
         conn.close()
 
 def create_user(
+    id: str,
     name: str,
     email: str,
     phone: str = None,
@@ -75,6 +80,7 @@ def create_user(
     """
     # 1) Collect only the fields that are not None
     fields = {
+        "id": id,
         "name": name,
         "email": email,
         "phone": phone,
@@ -110,7 +116,7 @@ def create_user(
     finally:
         conn.close()
 
-def create_lead(user_id: int, status: str) -> Dict:
+def create_lead(user_id: str, status: str) -> Dict:
     """Create a new lead for a user."""
     conn = get_db_connection()
     cur = conn.cursor()
@@ -152,18 +158,22 @@ def update_lead_status(lead_id: int, status: str) -> Optional[Dict]:
 
 ## ----------- Qualifications Handling ------------- ##
 
-def create_qualification(user_id: int, questions: str, responses: str, result: bool, evaluated_at: Optional[str] = None) -> Dict:
+def create_qualification(user_id: str, questions: List[str], responses: List[str], result: bool, evaluated_at: Optional[str] = None) -> Dict:
     """
     Create a new qualification record for a user.
     """
 
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute(
-        "INSERT INTO qualifications (user_id, questions, responses, result, evaluated_at) "
-        "VALUES (%s, %s, %s, %s, %s) RETURNING id, user_id, questions, responses, result, evaluated_at",
+    q_json = json.dumps(questions)
+    r_json = json.dumps(responses)
+    sql = """
+      INSERT INTO qualifications
         (user_id, questions, responses, result, evaluated_at)
-    )
+      VALUES (%s, %s::jsonb, %s::jsonb, %s, %s)
+      RETURNING id, user_id, questions, responses, result, evaluated_at
+    """
+    cur.execute(sql, (user_id, q_json, r_json, result, evaluated_at))
     row = cur.fetchone()
     conn.commit()
     cur.close()
@@ -177,7 +187,7 @@ def create_qualification(user_id: int, questions: str, responses: str, result: b
         "evaluated_at": row[5].isoformat() if row[5] else None
     }
 
-def update_qualification_based_on_user(user_id:int, qualification_status: str):
+def update_qualification_based_on_user(user_id:str, qualification_status: str):
     """
     Update the qualification status of a user based on their ID.
     """
@@ -202,7 +212,7 @@ def update_qualification_based_on_user(user_id:int, qualification_status: str):
         }
     return None
 
-def get_qualification_status(user_id: int):
+def get_qualification_status(user_id: str):
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("SELECT qualification_status FROM leads WHERE user_id = %s", (user_id,))
@@ -260,4 +270,33 @@ def assemble_context_from_form(form_data: dict) -> dict:
     return context
 
 
+## Mail Sending Tools
+def send_questionnaire_email(
+    recipient_email: str,
+    recipient_name: str,
+    questions: List[str],
+    template_id: str = "x2p0347y3p74zdrn"
+) -> Dict[str, Any]:
+    """
+    Sends a templated questionnaire email to a specific client.
+    - recipient_email: destination email address
+    - recipient_name: for personalization
+    - questions: list of questions to inject into template
+    - template_id: MailerSend template identifier
+    """
+    # 2) Build Personalization
+    personalization = Personalization(
+        to=recipient_email,
+        variables={
+            "name": recipient_name,        
+            "questions": questions        
+        }
+    )
 
+    # 3) Construct Template message
+    template = Template(template_id=template_id)
+    template.personalization = [personalization]  
+
+    # 4) Send and return response
+    response = mailer.send(template)             
+    return response.json()
